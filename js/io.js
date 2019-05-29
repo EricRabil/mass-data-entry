@@ -10,7 +10,7 @@ var IOKit;
 (function (IOKit) {
     IOKit.ENTRIES_PATH = path_1.default.resolve(__dirname, "..", "entries");
     async function writeEntries({ structureID }, entries, meta) {
-        const name = `${structureID}-entry-${uuid_1.default.v1()}`;
+        const name = `${structureID}-entry-${uuid_1.default.v1()}.json`;
         await fs_extra_1.default.mkdirp(IOKit.ENTRIES_PATH);
         await fs_extra_1.default.writeJSON(path_1.default.resolve(IOKit.ENTRIES_PATH, name), { structureID, entries, meta });
     }

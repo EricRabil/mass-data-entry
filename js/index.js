@@ -69,6 +69,8 @@ commander_1.default.option("-o, --output", "Output directory. Defaults to @mass-
         }
         entries.push(entry);
     }
+    if (entries.length === 0)
+        return;
     await io_1.IOKit.writeEntries(struct, entries, meta);
 });
 commander_1.default.parse(process.argv);

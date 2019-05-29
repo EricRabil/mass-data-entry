@@ -73,6 +73,8 @@ program.option("-o, --output", "Output directory. Defaults to @mass-data-entry/e
                 entries.push(entry);
             }
 
+            if (entries.length === 0) return;
+
             await IOKit.writeEntries(struct, entries, meta);
        });
 
