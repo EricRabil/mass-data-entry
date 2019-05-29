@@ -1,5 +1,8 @@
 {
     "structureID": "mc-exam-4q",
+    "meta": {
+        "name": "string"
+    },
     "fields": {
         "question": "string",
         "A": "string",

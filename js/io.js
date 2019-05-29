@@ -9,10 +9,10 @@ const uuid_1 = __importDefault(require("uuid"));
 var IOKit;
 (function (IOKit) {
     IOKit.ENTRIES_PATH = path_1.default.resolve(__dirname, "..", "entries");
-    async function writeEntries({ structureID }, entries) {
+    async function writeEntries({ structureID }, entries, meta) {
         const name = `${structureID}-entry-${uuid_1.default.v1()}`;
         await fs_extra_1.default.mkdirp(IOKit.ENTRIES_PATH);
-        await fs_extra_1.default.writeJSON(path_1.default.resolve(IOKit.ENTRIES_PATH, name), { structureID, entries });
+        await fs_extra_1.default.writeJSON(path_1.default.resolve(IOKit.ENTRIES_PATH, name), { structureID, entries, meta });
     }
     IOKit.writeEntries = writeEntries;
 })(IOKit = exports.IOKit || (exports.IOKit = {}));

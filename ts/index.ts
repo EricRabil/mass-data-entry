@@ -8,20 +8,51 @@ import DataStructure, { validateDataStructure, Entry } from "./structures/DataSt
 
 const ESCAPE_TOKEN = "::q";
 
+function getInput(token: string, fieldKey: string, fieldValue: "string" | "number" | "boolean"): string | number | boolean {
+    const answer = readline.question(chalk.yellow(`[${fieldValue[0]}] `) + chalk.green(`${fieldKey}: `));
+
+    if (answer === token) throw "break";
+
+    let parsedValue: string | boolean | number;
+    if (fieldValue[0] === "n") {
+        if (isNaN(parsedValue = parseFloat(answer))) return getInput(token, fieldKey, fieldValue);
+    } else if (fieldValue[0] === "b") {
+        parsedValue = Boolean(answer);
+    } else parsedValue = answer;
+    return parsedValue;
+}
+
 program.version(fs.readJSONSync("../package.json").version);
 program.option("-o, --output", "Output directory. Defaults to @mass-data-entry/entries")
        .option("-e, --escape", `String token that signals the program to stop, default is ${ESCAPE_TOKEN}`)
+       .option("-l, --load", "Load and append to an existing entry file")
        .command("dp <structure>")
-       .action(async function(structure: string, {output, escape}: {output?: string, escape?: string}) {
+       .action(async function(structure: string, {output, escape, load}: {output?: string, escape?: string, load?: string}) {
             if (output) IOKit.ENTRIES_PATH = output;
 
             let struct: DataStructure = undefined as any;
             if (!(await fs.pathExists(structure)) || !structure.endsWith(".json") || !validateDataStructure(struct = await fs.readJSON(structure))) console.log(chalk.red("Please supply a valid structure file"));
 
             const token = escape || ESCAPE_TOKEN;
-            const fields = Object.keys(struct.fields).map((fieldKey) => ({fieldKey, fieldValue: struct.fields[fieldKey]}));
 
-            const entries: Entry[] = [];
+            const meta: Entry = {};
+
+            const destructure = (obj: {[key: string]: "string" | "number" | "boolean"}) => Object.keys(obj).map((fieldKey) => ({fieldKey, fieldValue: obj[fieldKey]}));
+
+            if (struct.meta) {
+                console.log(chalk.blue("doing metadata collection"))
+
+                const metaFields = destructure(struct.meta as any);
+
+                metaFields.forEach(({fieldKey, fieldValue}) => {
+                    meta[fieldKey] = getInput(token, fieldKey, fieldValue);
+                });
+            }
+
+            const fields = destructure(struct.fields);
+
+            let entries: Entry[] = [];
+            if (load) entries = entries.concat(JSON.parse(load).entries);
 
             while (true) {
                 console.log(chalk.blue(`new entry starting now, submit ${token} at any time to break`));
@@ -32,21 +63,7 @@ program.option("-o, --output", "Output directory. Defaults to @mass-data-entry/e
 
                 try {
                     fields.forEach(({fieldKey, fieldValue}) => {
-                        const ask: any = () => {
-                            const answer = readline.question(chalk.yellow(`[${fieldValue[0]}] `) + chalk.green(`${fieldKey}: `));
-
-                            if (answer === token) throw "break";
-    
-                            let parsedValue: string | boolean | number;
-                            if (fieldValue[0] === "n") {
-                                if (isNaN(parsedValue = parseFloat(answer))) return ask();
-                            } else if (fieldValue[0] === "b") {
-                                parsedValue = Boolean(answer);
-                            } else parsedValue = answer;
-                            entry[fieldKey] = parsedValue;
-                        }
-    
-                        ask();
+                        entry[fieldKey] = getInput(token, fieldKey, fieldValue);
                     });
                 } catch (e) {
                     if (e === "break") break;
@@ -56,7 +73,7 @@ program.option("-o, --output", "Output directory. Defaults to @mass-data-entry/e
                 entries.push(entry);
             }
 
-            await IOKit.writeEntries(struct, entries);
+            await IOKit.writeEntries(struct, entries, meta);
        });
 
 program.parse(process.argv)

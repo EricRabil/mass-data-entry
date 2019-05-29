@@ -6,6 +6,9 @@ export default interface DataStructure {
     structureID: string;
     fields: {
         [key: string]: "string" | "number" | "boolean";
+    };
+    meta?: {
+        [key: string]: "stirng" | "number" | "boolean";
     }
 }
 
