@@ -1,0 +1,10 @@
+{
+    "structureID": "mc-exam-4q",
+    "fields": {
+        "question": "string",
+        "A": "string",
+        "B": "string",
+        "C": "string",
+        "D": "string"
+    }
+}
